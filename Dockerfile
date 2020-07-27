@@ -2,8 +2,8 @@ FROM ruby:2.7.1-alpine
 
 RUN apk update && apk add bash build-base nodejs postgresql-dev tzdata
 
-RUN mkdir /project
-WORKDIR /project
+RUN mkdir /autocomplete-api
+WORKDIR /autocomplete-api
 
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler --no-document

@@ -4,7 +4,7 @@ services:
   db:
     image: 'postgres:10-alpine'
     volumes:
-      - 'postgres:/var/lib/postgresql/data'
+      - ./data/postgres:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     environment:
@@ -16,18 +16,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - 'redis:/data'
-
-  web:
-    depends_on:
-      - 'db'
-      - 'redis'
-    build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-    ports:
-      - '3000:3000'
-    environment:
-      - DATABASE_HOST=db
+      - ./data/redis:/data
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.1.0
@@ -45,9 +34,19 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./docker_data/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-volumes:
-  redis:
-  postgres:
+
+  web:
+    depends_on:
+      - 'db'
+      - 'redis'
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/autocomplete-api
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_HOST=db
