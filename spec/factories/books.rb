@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :book do
-    title { "MyString" }
-    author { "MyString" }
-    publisher { "MyString" }
-    genre { "MyString" }
-    published_at { "2020-07-27" }
+    title { Faker::Book.title }
+    author { Faker::Book.author }
+    publisher { Faker::Book.publisher }
+    genre { Faker::Book.genre }
+    published_at { Faker::Date.in_date_period }
   end
 end
