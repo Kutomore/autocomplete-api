@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  db:
+    image: 'postgres:10-alpine'
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  redis:
+    image: 'redis:5-alpine'
+    command: redis-server
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis:/data'
+
+  web:
+    depends_on:
+      - 'db'
+      - 'redis'
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_HOST=db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.1.0
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker_data/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+volumes:
+  redis:
+  postgres:
